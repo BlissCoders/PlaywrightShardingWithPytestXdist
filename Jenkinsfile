@@ -19,8 +19,8 @@ pipeline {
                     stage('Run Shard') {
                         steps {
                             sh """
-                            python3 -m venv venv_$SHARD_INDEX
-                            . venv_$SHARD_INDEX/bin/activate
+                            python3 -m venv venv_${SHARD_INDEX}
+                            . venv_${SHARD_INDEX}/bin/activate
 
                             pip install --upgrade pip
                             pip install -r requirements.txt
@@ -28,9 +28,9 @@ pipeline {
                             playwright install
 
                             pytest -n auto \
-                              --shard-id=$SHARD_INDEX \
-                              --num-shards=$TOTAL_SHARDS \
-                              --junitxml=results_$SHARD_INDEX.xml
+                              --shard-id=${SHARD_INDEX} \
+                              --num-shards=${TOTAL_SHARDS} \
+                              --junitxml=results_${SHARD_INDEX}.xml
                             """
                         }
                     }
