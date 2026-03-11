@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        TOTAL_SHARDS = "2"
+        TOTAL_SHARDS = "3"
     }
 
     stages {
