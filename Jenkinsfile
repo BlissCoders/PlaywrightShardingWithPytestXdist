@@ -1,38 +1,57 @@
 pipeline {
     agent any
 
+    environment {
+        TOTAL_SHARDS = "2"
+    }
+
     stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
         stage('Distributed Tests') {
             matrix {
                 axes {
                     axis {
                         name 'SHARD_INDEX'
-                        values '1', '2'
+                        values '0', '1'
                     }
                 }
 
-                environment {
-                    TOTAL_SHARDS = '2'
-                }
-
                 stages {
+
                     stage('Run Shard') {
                         steps {
                             sh """
-                            python3 -m venv venv_${SHARD_INDEX}
-                            . venv_${SHARD_INDEX}/bin/activate
+                                echo "Running shard ${SHARD_INDEX}/${TOTAL_SHARDS}"
 
-                            pip install --upgrade pip
-                            pip install -r requirements.txt
+                                python3 -m venv venv_${SHARD_INDEX}
+                                . venv_${SHARD_INDEX}/bin/activate
 
-                            playwright install
+                                pip install --upgrade pip
+                                pip install -r requirements.txt
 
-                            pytest -n auto \
-                              --shard-id=${SHARD_INDEX} \
-                              --num-shards=${TOTAL_SHARDS} \
-                              --junitxml=results_${SHARD_INDEX}.xml
+                                playwright install
+
+                                pytest tests \
+                                    -n 4 \
+                                    --dist loadscope \
+                                    --shard-id=${SHARD_INDEX} \
+                                    --num-shards=${TOTAL_SHARDS} \
+                                    --junitxml=results_${SHARD_INDEX}.xml
                             """
                         }
+                    }
+
+                }
+
+                post {
+                    always {
+                        junit "results_${SHARD_INDEX}.xml"
                     }
                 }
             }
@@ -41,7 +60,10 @@ pipeline {
 
     post {
         always {
-            junit 'results_*.xml'
+            echo "Pipeline finished"
+        }
+        failure {
+            echo "Tests failed"
         }
     }
 }
