@@ -18,7 +18,7 @@ pipeline {
                 axes {
                     axis {
                         name 'SHARD_INDEX'
-                        values '0', '1'
+                        values '0', '1', '2'
                     }
                 }
 
@@ -38,7 +38,7 @@ pipeline {
                                 playwright install
 
                                 pytest tests \
-                                    -n 4 \
+                                    -n 3 \
                                     --dist loadscope \
                                     --shard-id=${SHARD_INDEX} \
                                     --num-shards=${TOTAL_SHARDS} \
